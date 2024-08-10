@@ -119,105 +119,13 @@ local PageSection1 = Page:Section({
     Remaining UI Elements
 ]]
 
--- Label
-PageSection1:Label({
-    Name = "Label", -- name, Name, title, Title
-    Center = true
-})
-
--- TextBox
-PageSection1:TextBox({
-    Default = "TextBox", 
-    Placeholder = "Type Here...", 
-    Max = 100,
-    Reactive = true,
-    Callback = function(value) 
-        print(value)
-    end
-})
-
--- Example KeyBind Toggle
+-- Toggle for Chams (ESP)
 PageSection1:Toggle({
-    Name = "KeyBindToggle", -- name, Name, title, Title
+    Name = "Enable Chams", -- name, Name, title, Title
     Default = false,
     Callback = function(value)
-        print(value)
+        toggleESP(value)
     end
-}):Keybind({
-    Name = "KeybindToggle", -- name, Name, title, Title
-    Default = Enum.KeyCode.X, 
-    KeybindName = "KeybindToggle", 
-    Mode = "Toggle", 
-    Callback = function(Input, State) 
-        print(Input, State) 
-    end
-})
-
--- Button
-PageSection1:Button({
-    Name = "Button", -- name, Name, title, Title
-    Callback = function(value)
-        print(value)
-    end
-})
-
--- Slider
-PageSection1:Slider({
-    Name = "Slider", -- name, Name, title, Title
-    Min = 1, 
-    Max = 100, 
-    Default = 1, 
-    Callback = function(value)
-        print(value)
-    end
-})
-
--- Multibox
-PageSection1:Multibox({
-    Name = "MultiBox", 
-    Default = {"1", "2"}, 
-    Options = {"1", "2", "3", "4", "5", "6", "7", "8"}, 
-    Min = 2, 
-    Max = 5, 
-    Callback = function(value) 
-        print(value) 
-    end
-})
-
--- Dropdown
-PageSection1:Dropdown({
-    Name = "DropDown", -- name, Name, title, Title
-    Default = "1",
-    Max = "3",
-    Options = {"1", "2", "3"},
-    Callback = function(value)
-        print(value)
-    end
-})
-
--- Color Picker
-PageSection1:Colorpicker({
-    Name = "ColorPicker", -- name, Name, title, Title
-    Default = Color3.fromRGB(255, 0, 0),
-    Transparency = 0.25,
-    Info = "Color",
-    Callback = function(value)
-        print(value)
-    end
-})
-
--- ListBox
-PageSection1:Label({
-    Name = "ListBox", -- name, Name, title, Title
-    Center = true
-})
-
--- List
-PageSection1:List({
-    Name = "List", -- name, Name, title, Title
-    Default = 1,
-    Max = 5,
-    Options = {"1", "2", "3", "4", "5"}
 })
 
 -- Player List
