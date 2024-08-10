@@ -1,2 +1,1 @@
-# AimWare
-TR3DF1BTBRT42BH5RFDG4AREDS34rgedf3GHYjnhYjiuJIljIOTGIUhoipu790YIUYvgyutf
+This Is An Open Source Project Delta Script
