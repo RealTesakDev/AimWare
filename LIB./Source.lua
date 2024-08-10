@@ -224,3 +224,17 @@ local PlayerList = PlayerPage:PlayerList({})
 
 -- Initialize UI
 Window:Initialize() -- DO NOT REMOVE
+
+-- Toggle Menu Visibility with RightShift
+local menuVisible = true
+
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if not gameProcessed and input.KeyCode == Enum.KeyCode.RightShift then
+        menuVisible = not menuVisible
+        if menuVisible then
+            Window:Fade() -- or Window:Initialize() if you want to completely reinitialize
+        else
+            Window:CloseContent()
+        end
+    end
+end)
