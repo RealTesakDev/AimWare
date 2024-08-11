@@ -198,19 +198,37 @@ end)
 local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/matas3535/gamesneeze/main/Library.lua"))()
 
 local Window = Library:New({
-    Name = "Title", -- name, Name, title, Title
+    Name = "Aimware", -- name, Name, title, Title
 })
 
+-- Main Page
+local MainPage = Window:Page({
+    Name = "Main" -- name, Name, title, Title
+})
+
+local PageSection1 = MainPage:Section({
+    Name = "Main", -- name, Name, title, Title
+    Fill = true,
+    Side = "Left"
+})
+
+-- Toggle for Aimbot
+PageSection1:Toggle({
+    Name = "Aimbot", -- name, Name, title, Title
+    Default = false,
+    Callback = function(value)
+        print(value)
+    end
+})
+
+-- Visuals Page
 local Page = Window:Page({
-    Name = "Page" -- name, Name, title, Title
+    Name = "Visuals" -- name, Name, title, Title
 })
 
-local PlayerPage = Window:Page({
-    Name = "Players"
-})
 
 local PageSection1 = Page:Section({
-    Name = "Section", -- name, Name, title, Title
+    Name = "Players", -- name, Name, title, Title
     Fill = true,
     Side = "Left"
 })
@@ -236,8 +254,34 @@ PageSection1:Toggle({
     end
 })
 
+-- Players Page
+local PlayerPage = Window:Page({
+    Name = "Players"
+})
+
 -- Player List
 local PlayerList = PlayerPage:PlayerList({})
+
+-- Main Page
+local MainPage = Window:Page({
+    Name = "Main" -- name, Name, title, Title
+})
+
+local PageSection1 = MainPage:Section({
+    Name = "Main", -- name, Name, title, Title
+    Fill = true,
+    Side = "Left"
+})
+
+-- Button To Destory Menu
+local Button1 = PageSection1:Button({
+    Name = "Button", -- name, Name, title, Title
+    callback = function(value)
+        toggleNAMETAGS(false)
+        toggleESP(false)
+        
+    end
+})
 
 -- Initialize UI
 Window:Initialize() -- DO NOT REMOVE
