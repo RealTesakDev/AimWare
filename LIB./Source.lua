@@ -4,8 +4,10 @@ local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 local Camera = workspace.CurrentCamera
 local TweenService = game:GetService("TweenService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local DroppedItems = Workspace:FindFirstChild("DroppedItems")
 
---  Variables
+-- Variables
 local ESPEnabled = false
 local NAMETAGSEnabled = false
 local updateConnection = nil
@@ -15,10 +17,34 @@ local AimbotActive = false
 local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
 local humanoid = character:WaitForChild("Humanoid")
 
+local TargetNames2 = {
+    "LeftLowerArm",
+    "LeftUpperArm",
+    "RightLowerArm",
+    "RightUpperArm",
+    "LeftHand",
+    "RightHand"
+}
+
+-- Variable to control whether GunChams is enabled
+local GunChamsEnabled = false
+
+-- Variable to control whether DroppedItems highlighting is enabled
+local DroppedItemsEnabled = false
+
 -- Speed-related variables
 local increasedWalkSpeed = 20  -- Set your desired speed here
 local defaultWalkSpeed = humanoid.WalkSpeed  -- Save the default speed
 local speedConnection
+
+-- Loot ESP variables
+local targetNames = {"Locker", "MilitaryCrate"} -- Replace with the names of the objects you want to highlight
+local highlightedObjects = {}
+local updateInterval = 0.5 -- Update every 0.5 seconds
+local lastUpdateTime = 0
+local lootEspConnection
+local LootEspEnabled = false
+
 
 -- Function to enable player speed boost
 local function PlayerSpeedEnabled()
@@ -132,7 +158,6 @@ Players.PlayerRemoving:Connect(function(player)
         removeChamsEffect(player.Character)
     end
 end)
--- NAMETAGS ESP
 
 
 -- Function to apply the ESP effect to a player's character
@@ -227,6 +252,7 @@ Players.PlayerRemoving:Connect(function(player)
         removeEspEffect(player.Character)
     end
 end)
+
 
 -- USEAGE : toggleNAMETAGS(false) OFF
 -- USEAGE : toggleNAMETAGS(true) ON
@@ -337,6 +363,269 @@ end)
 -- Disable aimbot later
 -- AimbotEnabled(false)
 
+-- Loot ESP functions
+local function createHighlight(object)
+    local highlight = object:FindFirstChildOfClass("Highlight")
+    if not highlight then
+        highlight = Instance.new("Highlight")
+        highlight.Parent = object
+        highlight.Adornee = object
+        highlight.FillColor = Color3.new(1, 0.5, 0) -- Orange fill color, can be changed
+        highlight.OutlineColor = Color3.new(1, 1, 0) -- Yellow outline color, can be changed
+        highlight.FillTransparency = 0.5 -- Adjust fill transparency (0 is opaque, 1 is fully transparent)
+        highlight.OutlineTransparency = 0 -- Adjust outline transparency (0 is opaque, 1 is fully transparent)
+    end
+end
+
+local function removeHighlight(object)
+    local highlight = object:FindFirstChildOfClass("Highlight")
+    if highlight then
+        highlight:Destroy()
+    end
+end
+
+local function updateMatchingObjects()
+    for _, object in ipairs(workspace:GetDescendants()) do
+        if table.find(targetNames, object.Name) and (object:IsA("Model") or object:IsA("BasePart")) then
+            if LootEspEnabled then
+                if not highlightedObjects[object] then
+                    createHighlight(object)
+                    highlightedObjects[object] = true
+                end
+            else
+                if highlightedObjects[object] then
+                    removeHighlight(object)
+                    highlightedObjects[object] = nil
+                end
+            end
+        end
+    end
+end
+
+local function toggleLootEsp(enabled)
+    LootEspEnabled = enabled
+    if enabled then
+        updateMatchingObjects()
+        if not lootEspConnection then
+            lootEspConnection = RunService.Heartbeat:Connect(function(deltaTime)
+                lastUpdateTime = lastUpdateTime + deltaTime
+                if lastUpdateTime >= updateInterval then
+                    updateMatchingObjects()
+                    lastUpdateTime = 0
+                end
+            end)
+        end
+    else
+        updateMatchingObjects()
+        if lootEspConnection then
+            lootEspConnection:Disconnect()
+            lootEspConnection = nil
+        end
+    end
+end
+
+
+-- Variable to control whether HandChams is enabled
+local HandChamsEnabled = false
+
+-- Table to keep track of currently highlighted parts
+local highlightedParts = {}
+
+-- Function to create highlight
+local function createHighlight(object)
+    if object and not object:FindFirstChildOfClass("Highlight") then
+        local highlight = Instance.new("Highlight")
+        highlight.Parent = object
+        highlight.Adornee = object
+        highlight.FillColor = Color3.new(0, 1, 0) -- Green fill color
+        highlight.OutlineColor = Color3.new(1, 1, 1) -- White outline color
+        highlight.FillTransparency = 0.8 -- Adjust fill transparency
+        highlight.OutlineTransparency = 0 -- Adjust outline transparency
+    end
+end
+
+-- Function to remove highlight
+local function removeHighlight(object)
+    local highlight = object:FindFirstChildOfClass("Highlight")
+    if highlight then
+        highlight:Destroy()
+    end
+end
+
+-- Function to highlight specific parts in ViewModel
+local function updateHighlights()
+    local viewModel = Camera:FindFirstChild("ViewModel")
+    if viewModel then
+        for _, name in ipairs(TargetNames2) do
+            local part = viewModel:FindFirstChild(name)
+            if part then
+                if HandChamsEnabled then
+                    createHighlight(part)
+                    table.insert(highlightedParts, part)
+                else
+                    removeHighlight(part)
+                end
+            end
+        end
+    end
+
+    -- Clean up the highlightedParts table when HandChams is disabled
+    if not HandChamsEnabled then
+        highlightedParts = {}
+    end
+end
+
+-- Connect update function to RunService's RenderStepped
+RunService.RenderStepped:Connect(updateHighlights)
+
+-- Function to toggle HandChams
+local function toggleHandChams(enabled)
+    HandChamsEnabled = enabled
+end
+
+-- Example usage: Toggle HandChams on and off
+--  toggleHandChams(true) -- Enable highlighting
+--- toggleHandChams(false) -- Disable highlighting
+
+
+
+-- Function to create highlight
+local function createHighlight(object)
+    if object and not object:FindFirstChildOfClass("Highlight") then
+        local highlight = Instance.new("Highlight")
+        highlight.Parent = object
+        highlight.Adornee = object
+        highlight.FillColor = Color3.new(0, 1, 0) -- Green fill color
+        highlight.OutlineColor = Color3.new(1, 1, 1) -- White outline color
+        highlight.FillTransparency = 0.3 -- Adjust fill transparency (0 is opaque, 1 is fully transparent)
+        highlight.OutlineTransparency = 0 -- Adjust outline transparency (0 is opaque, 1 is fully transparent)
+    end
+end
+
+-- Function to remove highlight
+local function removeHighlight(object)
+    local highlight = object:FindFirstChildOfClass("Highlight")
+    if highlight then
+        highlight:Destroy()
+    end
+end
+
+-- Function to update the highlight based on GunChamsEnabled
+local function updateHighlight()
+    local viewModel = Camera:FindFirstChild("ViewModel")
+    if viewModel then
+        local item = viewModel:FindFirstChild("Item")
+        if item then
+            if GunChamsEnabled then
+                createHighlight(item)
+            else
+                removeHighlight(item)
+            end
+        end
+    end
+end
+
+-- Toggle function for GunChams
+local function toggleGunChams(enabled)
+    GunChamsEnabled = enabled
+    if not enabled then
+        updateHighlight() -- Remove the highlight when disabling
+    end
+end
+
+-- Connect update function to RunService's RenderStepped
+RunService.RenderStepped:Connect(updateHighlight)
+
+-- Example usage to toggle GunChams
+--  toggleGunChams(true)  -- Enable highlighting
+--  toggleGunChams(false) -- Disable highlighting
+
+
+
+
+-- Function to create a highlight and name display
+local function highlightAndDisplayName(object)
+    -- Create highlight
+    if not object:FindFirstChildOfClass("Highlight") then
+        local highlight = Instance.new("Highlight")
+        highlight.Parent = object
+        highlight.Adornee = object
+        highlight.FillColor = Color3.new(1, 1, 1) -- White color
+        highlight.OutlineColor = Color3.new(1, 1, 1) -- White outline
+        highlight.FillTransparency = 0.5 -- Semi-transparent
+        highlight.OutlineTransparency = 0.5 -- Semi-transparent
+    end
+
+    -- Create BillboardGui to display name
+    if not object:FindFirstChild("NameDisplay") then
+        local billboard = Instance.new("BillboardGui")
+        billboard.Name = "NameDisplay"
+        billboard.Parent = object
+        billboard.Adornee = object
+        billboard.Size = UDim2.new(0, 200, 0, 50)
+        billboard.StudsOffset = Vector3.new(0, 2, 0)
+        billboard.AlwaysOnTop = true
+
+        local textLabel = Instance.new("TextLabel")
+        textLabel.Parent = billboard
+        textLabel.Size = UDim2.new(1, 0, 1, 0)
+        textLabel.BackgroundTransparency = 1
+        textLabel.Text = object.Name
+        textLabel.TextColor3 = Color3.new(1, 1, 1) -- White text color
+        textLabel.TextScaled = false
+        textLabel.TextSize = 25 -- Set font size here
+        textLabel.Font = Enum.Font.SourceSans -- Change font type here if needed
+    end
+end
+
+-- Function to remove highlight and name display
+local function removeHighlightAndNameDisplay(object)
+    local highlight = object:FindFirstChildOfClass("Highlight")
+    if highlight then
+        highlight:Destroy()
+    end
+
+    local nameDisplay = object:FindFirstChild("NameDisplay")
+    if nameDisplay then
+        nameDisplay:Destroy()
+    end
+end
+
+-- Update function to check and highlight objects in DroppedItems
+local function updateHighlights()
+    if DroppedItems then
+        for _, item in pairs(DroppedItems:GetChildren()) do
+            if DroppedItemsEnabled and (item:IsA("BasePart") or item:IsA("Model")) then
+                highlightAndDisplayName(item)
+            else
+                removeHighlightAndNameDisplay(item)
+            end
+        end
+    end
+end
+
+-- Function to toggle the DroppedItems highlighting
+local function toggleDroppedItems(enabled)
+    DroppedItemsEnabled = enabled
+    if not enabled then
+        -- When disabling, remove all highlights and name displays
+        if DroppedItems then
+            for _, item in pairs(DroppedItems:GetChildren()) do
+                removeHighlightAndNameDisplay(item)
+            end
+        end
+    end
+end
+
+-- Connect update function to RunService's RenderStepped
+RunService.RenderStepped:Connect(updateHighlights)
+
+-- Example usage to toggle DroppedItems
+--  toggleDroppedItems(true)  -- Enable highlighting and name display
+--  toggleDroppedItems(false) -- Disable highlighting and name display
+
+
+
 
 
 
@@ -393,6 +682,22 @@ PageSection1:Toggle({
 })
 
 PageSection1:Toggle({
+    Name = "Gun Chams", -- name, Name, title, Title
+    Default = false,
+    Callback = function(value)
+            toggleGunChams(value)
+    end
+})
+
+PageSection1:Toggle({
+    Name = "Arm Chams", -- name, Name, title, Title
+    Default = false,
+    Callback = function(value)
+            toggleHandChams(value)
+    end
+})
+
+PageSection1:Toggle({
     Name = "Enable Esp", -- name, Name, title, Title
     Default = false,
     Callback = function(value)
@@ -409,7 +714,7 @@ PageSection1:Toggle({
     Name = "Loot Esp", -- name, Name, title, Title
     Default = false,
     Callback = function(value)
-            
+        toggleLootEsp(value)
     end
 })
 
@@ -425,7 +730,7 @@ PageSection1:Toggle({
     Name = "Droped Item Esp", -- name, Name, title, Title
     Default = false,
     Callback = function(value)
-            
+            toggleDroppedItems(value)
     end
 })
 
@@ -469,6 +774,9 @@ local Button1 = PageSection1:Button({
         toggleESP(false)
         SpeedEnabled(false)
         AimbotEnabled(false)
+        toggleLootEsp(false)
+        toggleHandChams(false)
+        toggleGunChams(false)
         Window:Fade()
         Wait(5)
         Window:Unload()
@@ -477,17 +785,3 @@ local Button1 = PageSection1:Button({
 
 -- Initialize UI
 Window:Initialize() -- DO NOT REMOVE
-
--- Toggle Menu Visibility with RightShift
-local menuVisible = true
-
-UserInputService.InputBegan:Connect(function(input, gameProcessed)
-    if not gameProcessed and input.KeyCode == Enum.KeyCode.RightShift then
-        menuVisible = not menuVisible
-        if menuVisible then
-            Window:Fade() -- or Window:Initialize() if you want to completely reinitialize
-        else
-            Window:CloseContent()
-        end
-    end
-end)
