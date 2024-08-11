@@ -427,6 +427,7 @@ local Button1 = PageSection1:Button({
         toggleNAMETAGS(false)
         toggleESP(false)
         SpeedEnabled(false)
+        AimbotEnabled(false)
         Window:Fade()
         Wait(3)
         Window:Unload()
