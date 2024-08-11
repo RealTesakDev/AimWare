@@ -5,6 +5,7 @@ local UserInputService = game:GetService("UserInputService")
 
 -- Chams Variables
 local ESPEnabled = false
+local NAMETAGSEnabled = false
 local updateConnection = nil
 
 -- Function to apply the Chams effect to a player's character
@@ -93,7 +94,106 @@ Players.PlayerRemoving:Connect(function(player)
         removeChamsEffect(player.Character)
     end
 end)
+-- NAMETAGS ESP
 
+
+-- Function to apply the ESP effect to a player's character
+local function applyEspEffect(character)
+    local esp = character:FindFirstChild("ESP")
+    if not esp then
+        esp = Instance.new("BillboardGui")
+        esp.Name = "ESP"
+        esp.Adornee = character:FindFirstChild("Head")
+        esp.Parent = character
+        esp.Size = UDim2.new(0, 200, 0, 50)
+        esp.AlwaysOnTop = true
+
+        local textLabel = Instance.new("TextLabel")
+        textLabel.Size = UDim2.new(1, 0, 1, 0)
+        textLabel.BackgroundTransparency = 1
+        textLabel.TextColor3 = Color3.fromRGB(255, 0, 0) -- Red text color
+        textLabel.TextStrokeTransparency = 0.5
+        textLabel.Text = character.Name
+        textLabel.Parent = esp
+    end
+end
+
+-- Function to remove ESP effect from a player's character
+local function removeEspEffect(character)
+    local esp = character:FindFirstChild("ESP")
+    if esp then
+        esp:Destroy()
+    end
+end
+
+-- Function to apply ESP to all players
+local function applyEspToAllPlayers()
+    if not NAMETAGSEnabled then
+        return
+    end
+
+    -- Apply the ESP effect to all players currently in the game
+    for _, player in ipairs(Players:GetPlayers()) do
+        if player.Character and player.Character:FindFirstChild("Head") then
+            applyEspEffect(player.Character)
+        end
+    end
+end
+
+-- Function to start ESP updates
+local function startEspUpdates()
+    applyEspToAllPlayers()
+    updateConnection = RunService.Heartbeat:Connect(function()
+        if NAMETAGSEnabled then
+            applyEspToAllPlayers()
+        end
+    end)
+end
+
+-- Function to stop ESP updates
+local function stopEspUpdates()
+    if updateConnection then
+        updateConnection:Disconnect()
+        updateConnection = nil
+    end
+
+    -- Hide ESP for all players
+    for _, player in ipairs(Players:GetPlayers()) do
+        if player.Character then
+            removeEspEffect(player.Character)
+        end
+    end
+end
+
+-- Toggle function for ESP
+local function toggleNAMETAGS(enabled)
+    NAMETAGSEnabled = enabled
+    if enabled then
+        startEspUpdates()
+    else
+        stopEspUpdates()
+    end
+end
+
+-- Event listeners for players joining or leaving
+Players.PlayerAdded:Connect(function(player)
+    player.CharacterAdded:Connect(function(character)
+        if NAMETAGSEnabled then
+            applyEspEffect(character)
+        end
+    end)
+end)
+
+Players.PlayerRemoving:Connect(function(player)
+    if player.Character then
+        removeEspEffect(player.Character)
+    end
+end)
+
+-- USEAGE : toggleNAMETAGS(false) OFF
+-- USEAGE : toggleNAMETAGS(true) ON
+
+-- NAMETAGS ESP END
 -- UI Library Setup
 local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/matas3535/gamesneeze/main/Library.lua"))()
 
@@ -125,6 +225,14 @@ PageSection1:Toggle({
     Default = false,
     Callback = function(value)
         toggleESP(value)
+    end
+})
+
+PageSection1:Toggle({
+    Name = "Enable Esp", -- name, Name, title, Title
+    Default = false,
+    Callback = function(value)
+        toggleNAMETAGS(value)
     end
 })
 
