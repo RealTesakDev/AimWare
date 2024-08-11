@@ -16,7 +16,7 @@ local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
 local humanoid = character:WaitForChild("Humanoid")
 
 -- Speed-related variables
-local increasedWalkSpeed = 25  -- Set your desired speed here
+local increasedWalkSpeed = 20  -- Set your desired speed here
 local defaultWalkSpeed = humanoid.WalkSpeed  -- Save the default speed
 local speedConnection
 
@@ -420,6 +420,19 @@ PageSection1:Toggle({
     end
 })
 
+local Slider1 = PageSection1:Slider({
+    Name = "Slider (dont Work)", -- name, Name, title, Title
+    Min = 1, -- def, Def, default, Default
+    Max = 25, -- min, Min, minimum, Minimum
+    Default = 1, -- max, Max, maximum, Maximum
+    --Suffix = "ms", -- suffix, Suffix, ending, Ending, prefix, Prefix, measurement, Measurement
+    --decimals = 0.01,
+    --Disabled = false, -- disable, Disable, disabled, Disabled
+    callback = function(value)
+        print(value)
+    end
+})
+
 -- Button To Destroy Menu
 local Button1 = PageSection1:Button({
     Name = "Destroy Menu", -- name, Name, title, Title
@@ -429,7 +442,7 @@ local Button1 = PageSection1:Button({
         SpeedEnabled(false)
         AimbotEnabled(false)
         Window:Fade()
-        Wait(3)
+        Wait(5)
         Window:Unload()
     end
 })
