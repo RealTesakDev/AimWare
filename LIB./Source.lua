@@ -2,11 +2,49 @@
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
+local Camera = workspace.CurrentCamera
+local TweenService = game:GetService("TweenService")
 
--- Chams Variables
+--  Variables
 local ESPEnabled = false
 local NAMETAGSEnabled = false
 local updateConnection = nil
+local LocalPlayer = Players.LocalPlayer
+local Holding = false
+local AimbotActive = false
+local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
+
+-- Speed-related variables
+local increasedWalkSpeed = 50  -- Set your desired speed here
+local defaultWalkSpeed = humanoid.WalkSpeed  -- Save the default speed
+local speedConnection
+
+-- Function to enable player speed boost
+local function PlayerSpeedEnabled()
+    if speedConnection then return end  -- Prevent multiple connections
+    speedConnection = RunService.RenderStepped:Connect(function()
+        humanoid.WalkSpeed = increasedWalkSpeed
+    end)
+end
+
+-- Function to stop the speed boost and reset to default speed
+local function StopPlayerSpeed()
+    if speedConnection then
+        speedConnection:Disconnect()
+        speedConnection = nil
+    end
+    humanoid.WalkSpeed = defaultWalkSpeed  -- Reset to default speed
+end
+
+-- Function to toggle speed based on the value of SpeedEnabled
+local function SpeedEnabled(enabled)
+    if enabled then
+        PlayerSpeedEnabled()
+    else
+        StopPlayerSpeed()
+    end
+end
 
 -- Function to apply the Chams effect to a player's character
 local function applyChamsEffect(character)
@@ -194,6 +232,119 @@ end)
 -- USEAGE : toggleNAMETAGS(true) ON
 
 -- NAMETAGS ESP END
+
+
+-- Aimbot Configuration
+local AimbotConfig = {
+    TeamCheck = false, -- If set to true, the script would only lock your aim at enemy team members.
+    AimPart = "Head", -- Where the aimbot script would lock at.
+    Sensitivity = 0, -- How many seconds it takes for the aimbot script to officially lock onto the target's aimpart.
+    CircleSides = 64, -- How many sides the FOV circle would have.
+    CircleColor = Color3.fromRGB(255, 255, 255), -- (RGB) Color that the FOV circle would appear as.
+    CircleTransparency = 0.7, -- Transparency of the circle.
+    CircleRadius = 80, -- The radius of the circle / FOV.
+    CircleFilled = false, -- Determines whether or not the circle is filled.
+    CircleVisible = false, -- Determines whether or not the circle is visible.
+    CircleThickness = 0 -- The thickness of the circle.
+}
+
+local FOVCircle = Drawing.new("Circle")
+    FOVCircle.Position = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
+    FOVCircle.Radius = AimbotConfig.CircleRadius
+    FOVCircle.Filled = AimbotConfig.CircleFilled
+    FOVCircle.Color = AimbotConfig.CircleColor
+    FOVCircle.Visible = AimbotConfig.CircleVisible
+    FOVCircle.Transparency = AimbotConfig.CircleTransparency
+    FOVCircle.NumSides = AimbotConfig.CircleSides
+    FOVCircle.Thickness = AimbotConfig.CircleThickness
+
+-- Function to get the closest player within the FOV circle
+local function GetClosestPlayer()
+    local MaximumDistance = AimbotConfig.CircleRadius
+    local Target = nil
+
+    for _, v in ipairs(Players:GetPlayers()) do
+        if v.Name ~= LocalPlayer.Name then
+            if AimbotConfig.TeamCheck == true then
+                if v.Team ~= LocalPlayer.Team then
+                    if v.Character and v.Character:FindFirstChild("HumanoidRootPart") and v.Character:FindFirstChild("Humanoid") and v.Character.Humanoid.Health > 0 then
+                        local ScreenPoint = Camera:WorldToScreenPoint(v.Character.HumanoidRootPart.Position)
+                        local VectorDistance = (Vector2.new(UserInputService:GetMouseLocation().X, UserInputService:GetMouseLocation().Y) - Vector2.new(ScreenPoint.X, ScreenPoint.Y)).Magnitude
+
+                        if VectorDistance < MaximumDistance then
+                            Target = v
+                        end
+                    end
+                end
+            else
+                if v.Character and v.Character:FindFirstChild("HumanoidRootPart") and v.Character:FindFirstChild("Humanoid") and v.Character.Humanoid.Health > 0 then
+                    local ScreenPoint = Camera:WorldToScreenPoint(v.Character.HumanoidRootPart.Position)
+                    local VectorDistance = (Vector2.new(UserInputService:GetMouseLocation().X, UserInputService:GetMouseLocation().Y) - Vector2.new(ScreenPoint.X, ScreenPoint.Y)).Magnitude
+
+                    if VectorDistance < MaximumDistance then
+                        Target = v
+                    end
+                end
+            end
+        end
+    end
+
+    return Target
+end
+
+-- Function to enable or disable the aimbot
+local function AimbotEnabled(enabled)
+    AimbotActive = enabled
+    FOVCircle.Visible = enabled
+end
+
+-- Input listeners
+UserInputService.InputBegan:Connect(function(Input)
+    if Input.UserInputType == Enum.UserInputType.MouseButton2 then
+        Holding = true
+    end
+end)
+
+UserInputService.InputEnded:Connect(function(Input)
+    if Input.UserInputType == Enum.UserInputType.MouseButton2 then
+        Holding = false
+    end
+end)
+
+-- Update loop
+RunService.RenderStepped:Connect(function()
+    -- Update FOV Circle
+    FOVCircle.Position = Vector2.new(UserInputService:GetMouseLocation().X, UserInputService:GetMouseLocation().Y)
+    FOVCircle.Radius = AimbotConfig.CircleRadius
+    FOVCircle.Filled = AimbotConfig.CircleFilled
+    FOVCircle.Color = AimbotConfig.CircleColor
+    FOVCircle.Transparency = AimbotConfig.CircleTransparency
+    FOVCircle.NumSides = AimbotConfig.CircleSides
+    FOVCircle.Thickness = AimbotConfig.CircleThickness
+
+    if Holding and AimbotActive then
+        local target = GetClosestPlayer()
+        if target then
+            TweenService:Create(Camera, TweenInfo.new(AimbotConfig.Sensitivity, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {CFrame = CFrame.new(Camera.CFrame.Position, target.Character[AimbotConfig.AimPart].Position)}):Play()
+        end
+    end
+end)
+
+
+-- Example usage
+-- Enable aimbot AimbotEnabled(true)
+
+-- Disable aimbot later
+-- AimbotEnabled(false)
+
+
+
+
+
+
+
+
+
 -- UI Library Setup
 local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/matas3535/gamesneeze/main/Library.lua"))()
 
@@ -217,7 +368,7 @@ PageSection1:Toggle({
     Name = "Aimbot", -- name, Name, title, Title
     Default = false,
     Callback = function(value)
-        print(value)
+        AimbotEnabled(value)
     end
 })
 
@@ -226,16 +377,11 @@ local Page = Window:Page({
     Name = "Visuals" -- name, Name, title, Title
 })
 
-
 local PageSection1 = Page:Section({
     Name = "Players", -- name, Name, title, Title
     Fill = true,
     Side = "Left"
 })
-
---[[
-    Remaining UI Elements
-]]
 
 -- Toggle for Chams (ESP)
 PageSection1:Toggle({
@@ -251,35 +397,39 @@ PageSection1:Toggle({
     Default = false,
     Callback = function(value)
         toggleNAMETAGS(value)
+        AimbotEnabled(false)
     end
 })
 
--- Players Page
+-- Player Page
 local PlayerPage = Window:Page({
-    Name = "Players"
+    Name = "Player"
 })
 
--- Player List
-local PlayerList = PlayerPage:PlayerList({})
-
--- Main Page
-local MainPage = Window:Page({
-    Name = "Main" -- name, Name, title, Title
-})
-
-local PageSection1 = MainPage:Section({
-    Name = "Main", -- name, Name, title, Title
+local PageSection1 = PlayerPage:Section({
+    Name = "Movement", -- name, Name, title, Title
     Fill = true,
     Side = "Left"
 })
 
--- Button To Destory Menu
+PageSection1:Toggle({
+    Name = "Enable Speed", -- name, Name, title, Title
+    Default = false,
+    Callback = function(value)
+        SpeedEnabled(value)
+    end
+})
+
+-- Button To Destroy Menu
 local Button1 = PageSection1:Button({
-    Name = "Button", -- name, Name, title, Title
+    Name = "Destroy Menu", -- name, Name, title, Title
     callback = function(value)
         toggleNAMETAGS(false)
         toggleESP(false)
-        
+        SpeedEnabled(false)
+        Window:Fade()
+        Wait(3)
+        Window:Unload()
     end
 })
 
