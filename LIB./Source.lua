@@ -416,7 +416,7 @@ PageSection1:Toggle({
     Name = "Enable Speed", -- name, Name, title, Title
     Default = false,
     Callback = function(value)
-        SpeedEnabled(value)
+        
     end
 })
 
