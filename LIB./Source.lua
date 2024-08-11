@@ -14,8 +14,8 @@ local function applyChamsEffect(character)
     if not highlight then
         highlight = Instance.new("Highlight")
         highlight.Name = "ChamsHighlight"
-        highlight.FillColor = Color3.fromRGB(0, 255, 0) -- Green fill color
-        highlight.FillTransparency = 0.5
+        highlight.FillColor = Color3.fromRGB(255, 255, 255) -- Green fill color
+        highlight.FillTransparency = 0.8
         highlight.OutlineColor = Color3.fromRGB(255, 0, 0) -- Red outline color
         highlight.OutlineTransparency = 0.2
         highlight.Adornee = character
