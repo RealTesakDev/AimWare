@@ -52,10 +52,10 @@ local function applyChamsEffect(character)
     if not highlight then
         highlight = Instance.new("Highlight")
         highlight.Name = "ChamsHighlight"
-        highlight.FillColor = Color3.fromRGB(255, 255, 255) -- White fill color
-        highlight.FillTransparency = 1
-        highlight.OutlineColor = Color3.fromRGB(255, 0, 0) -- Red outline color
-        highlight.OutlineTransparency = 0.2
+        highlight.FillColor = Color3.new(1, 0.5, 0) -- White fill color
+        highlight.FillTransparency = 0.5
+        highlight.OutlineColor = Color3.new(1, 1, 0) -- Red outline color
+        highlight.OutlineTransparency = 0
         highlight.Adornee = character
         highlight.Parent = character
     end
@@ -397,7 +397,35 @@ PageSection1:Toggle({
     Default = false,
     Callback = function(value)
         toggleNAMETAGS(value)
-        AimbotEnabled(false)
+    end
+})
+
+local Label = PageSection1:Label({
+    Name = "Misc Esp", -- name, Name, title, Title
+    Center = true
+})
+
+PageSection1:Toggle({
+    Name = "Loot Esp", -- name, Name, title, Title
+    Default = false,
+    Callback = function(value)
+            
+    end
+})
+
+PageSection1:Toggle({
+    Name = "Npc Esp", -- name, Name, title, Title
+    Default = false,
+    Callback = function(value)
+            
+    end
+})
+
+PageSection1:Toggle({
+    Name = "Droped Item Esp", -- name, Name, title, Title
+    Default = false,
+    Callback = function(value)
+            
     end
 })
 
