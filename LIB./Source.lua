@@ -16,7 +16,7 @@ local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
 local humanoid = character:WaitForChild("Humanoid")
 
 -- Speed-related variables
-local increasedWalkSpeed = 15  -- Set your desired speed here
+local increasedWalkSpeed = 25  -- Set your desired speed here
 local defaultWalkSpeed = humanoid.WalkSpeed  -- Save the default speed
 local speedConnection
 
