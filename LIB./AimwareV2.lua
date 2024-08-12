@@ -2781,16 +2781,16 @@ end)
     charactertab:AddToggle("guncham", {
         Text = "gun chams",
         Default = false,
-        Callback = function(first)
-            toggleGunChams(first)
+        Callback = function(value)
+            toggleGunChams(value)
         end
     })
 
     charactertab:AddToggle("armcham", {
         Text = "arm chams",
         Default = false,
-        Callback = function(first)
-            toggleHandChams(first)
+        Callback = function(value)
+            toggleHandChams(value)
         end
     })
 
