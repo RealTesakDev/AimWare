@@ -2778,22 +2778,13 @@ charactertab:AddToggle("gaysexvisor", { Text = "remove visor visuals", Default =
     pdlt.novisor = aa
 end)
 
-    charactertab:AddToggle("guncham", {
-        Text = "gun chams",
-        Default = false,
-        Callback = function(value)
-            toggleGunChams(value)
-        end
-    })
+charactertab:AddToggle("guncham", { Text = "gun cham", Default = false }):OnChanged(function(aa)
+    toggleGunChams(aa)
+end)
 
-    charactertab:AddToggle("armcham", {
-        Text = "arm chams",
-        Default = false,
-        Callback = function(value)
-            toggleHandChams(value)
-        end
-    })
-
+charactertab:AddToggle("armcham", { Text = "arm chams", Default = false }):OnChanged(function(aa)
+    toggleHandChams(aa)
+end)
 
 (function()
     charactertab:AddToggle('showmazafak', { Text = 'inventory viewer', Default = false, Callback = function(v) end })
