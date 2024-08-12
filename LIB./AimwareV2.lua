@@ -25,6 +25,12 @@ if not LPH_OBFUSCATED then
 end;
 
 
+-- Ensure all required services are initialized
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local Players = game:GetService("Players")
+local Camera = workspace.CurrentCamera
+
 -- Variables
 local ESPEnabled = false
 local NAMETAGSEnabled = false
@@ -44,34 +50,32 @@ local TargetNames2 = {
     "RightHand"
 }
 
-
 -- Variable to control whether GunChams is enabled
 local GunChamsEnabled = false
 
-
 -- Aimbot Configuration
 local AimbotConfig = {
-    TeamCheck = false, -- If set to true, the script would only lock your aim at enemy team members.
-    AimPart = "Head", -- Where the aimbot script would lock at.
-    Sensitivity = 0, -- How many seconds it takes for the aimbot script to officially lock onto the target's aimpart.
-    CircleSides = 64, -- How many sides the FOV circle would have.
-    CircleColor = Color3.fromRGB(255, 255, 255), -- (RGB) Color that the FOV circle would appear as.
-    CircleTransparency = 0.7, -- Transparency of the circle.
-    CircleRadius = 80, -- The radius of the circle / FOV.
-    CircleFilled = false, -- Determines whether or not the circle is filled.
-    CircleVisible = false, -- Determines whether or not the circle is visible.
-    CircleThickness = 0 -- The thickness of the circle.
+    TeamCheck = false,
+    AimPart = "Head",
+    Sensitivity = 0,
+    CircleSides = 64,
+    CircleColor = Color3.fromRGB(255, 255, 255),
+    CircleTransparency = 0.7,
+    CircleRadius = 80,
+    CircleFilled = false,
+    CircleVisible = false,
+    CircleThickness = 0
 }
 
 local FOVCircle = Drawing.new("Circle")
-    FOVCircle.Position = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
-    FOVCircle.Radius = AimbotConfig.CircleRadius
-    FOVCircle.Filled = AimbotConfig.CircleFilled
-    FOVCircle.Color = AimbotConfig.CircleColor
-    FOVCircle.Visible = AimbotConfig.CircleVisible
-    FOVCircle.Transparency = AimbotConfig.CircleTransparency
-    FOVCircle.NumSides = AimbotConfig.CircleSides
-    FOVCircle.Thickness = AimbotConfig.CircleThickness
+FOVCircle.Position = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
+FOVCircle.Radius = AimbotConfig.CircleRadius
+FOVCircle.Filled = AimbotConfig.CircleFilled
+FOVCircle.Color = AimbotConfig.CircleColor
+FOVCircle.Visible = AimbotConfig.CircleVisible
+FOVCircle.Transparency = AimbotConfig.CircleTransparency
+FOVCircle.NumSides = AimbotConfig.CircleSides
+FOVCircle.Thickness = AimbotConfig.CircleThickness
 
 -- Function to get the closest player within the FOV circle
 local function GetClosestPlayer()
@@ -145,91 +149,19 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
-
--- Example usage
--- Enable aimbot AimbotEnabled(true)
-
--- Disable aimbot later
--- AimbotEnabled(false)
-
-
--- Variable to control whether HandChams is enabled
-local HandChamsEnabled = false
-
--- Table to keep track of currently highlighted parts
-local highlightedParts = {}
-
--- Function to create highlight
-local function createHighlight(object)
+-- Highlight Functions
+local function createHighlight(object, fillTransparency, outlineTransparency)
     if object and not object:FindFirstChildOfClass("Highlight") then
         local highlight = Instance.new("Highlight")
         highlight.Parent = object
         highlight.Adornee = object
-        highlight.FillColor = Color3.new(0, 1, 0) -- Green fill color
-        highlight.OutlineColor = Color3.new(1, 1, 1) -- White outline color
-        highlight.FillTransparency = 0.8 -- Adjust fill transparency
-        highlight.OutlineTransparency = 0 -- Adjust outline transparency
+        highlight.FillColor = Color3.new(0, 1, 0)
+        highlight.OutlineColor = Color3.new(1, 1, 1)
+        highlight.FillTransparency = fillTransparency or 0.3
+        highlight.OutlineTransparency = outlineTransparency or 0
     end
 end
 
--- Function to remove highlight
-local function removeHighlight(object)
-    local highlight = object:FindFirstChildOfClass("Highlight")
-    if highlight then
-        highlight:Destroy()
-    end
-end
-
--- Function to highlight specific parts in ViewModel
-local function updateHighlights()
-    local viewModel = Camera:FindFirstChild("ViewModel")
-    if viewModel then
-        for _, name in ipairs(TargetNames2) do
-            local part = viewModel:FindFirstChild(name)
-            if part then
-                if HandChamsEnabled then
-                    createHighlight(part)
-                    table.insert(highlightedParts, part)
-                else
-                    removeHighlight(part)
-                end
-            end
-        end
-    end
-
-    -- Clean up the highlightedParts table when HandChams is disabled
-    if not HandChamsEnabled then
-        highlightedParts = {}
-    end
-end
-
--- Connect update function to RunService's RenderStepped
-RunService.RenderStepped:Connect(updateHighlights)
-
--- Function to toggle HandChams
-local function toggleHandChams(enabled)
-    HandChamsEnabled = enabled
-end
-
--- Example usage: Toggle HandChams on and off
---  toggleHandChams(true) -- Enable highlighting
---- toggleHandChams(false) -- Disable highlighting
-
-
-- Function to create highlight
-local function createHighlight(object)
-    if object and not object:FindFirstChildOfClass("Highlight") then
-        local highlight = Instance.new("Highlight")
-        highlight.Parent = object
-        highlight.Adornee = object
-        highlight.FillColor = Color3.new(0, 1, 0) -- Green fill color
-        highlight.OutlineColor = Color3.new(1, 1, 1) -- White outline color
-        highlight.FillTransparency = 0.3 -- Adjust fill transparency (0 is opaque, 1 is fully transparent)
-        highlight.OutlineTransparency = 0 -- Adjust outline transparency (0 is opaque, 1 is fully transparent)
-    end
-end
-
--- Function to remove highlight
 local function removeHighlight(object)
     local highlight = object:FindFirstChildOfClass("Highlight")
     if highlight then
@@ -238,7 +170,7 @@ local function removeHighlight(object)
 end
 
 -- Function to update the highlight based on GunChamsEnabled
-local function updateHighlight()
+local function updateGunChamsHighlight()
     local viewModel = Camera:FindFirstChild("ViewModel")
     if viewModel then
         local item = viewModel:FindFirstChild("Item")
@@ -255,27 +187,40 @@ end
 -- Toggle function for GunChams
 local function toggleGunChams(enabled)
     GunChamsEnabled = enabled
-    if not enabled then
-        updateHighlight() -- Remove the highlight when disabling
+    updateGunChamsHighlight()
+end
+
+-- Function to highlight specific parts in ViewModel
+local function updateHandChamsHighlights()
+    local viewModel = Camera:FindFirstChild("ViewModel")
+    if viewModel then
+        for _, name in ipairs(TargetNames2) do
+            local part = viewModel:FindFirstChild(name)
+            if part then
+                if HandChamsEnabled then
+                    createHighlight(part, 0.8, 0)
+                else
+                    removeHighlight(part)
+                end
+            end
+        end
     end
 end
 
--- Connect update function to RunService's RenderStepped
-RunService.RenderStepped:Connect(updateHighlight)
+-- Toggle function for HandChams
+local function toggleHandChams(enabled)
+    HandChamsEnabled = enabled
+    updateHandChamsHighlights()
+end
 
--- Example usage to toggle GunChams
---  toggleGunChams(true)  -- Enable highlighting
---  toggleGunChams(false) -- Disable highlighting
+-- Connect update functions to RunService's RenderStepped
+RunService.RenderStepped:Connect(updateGunChamsHighlight)
+RunService.RenderStepped:Connect(updateHandChamsHighlights)
 
-
-
-
-
-
-
-
-
-
+-- Example usage:
+-- AimbotEnabled(true)
+-- toggleGunChams(true)
+-- toggleHandChams(true)
 
 
 
@@ -287,6 +232,17 @@ RunService.RenderStepped:Connect(updateHighlight)
 
 
 
+
+
+
+
+
+
+
+
+
+
+-- UI FUNCTIONS
 
 local counter = 1
 local devbuild228 = not swimguardvars
