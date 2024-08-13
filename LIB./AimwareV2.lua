@@ -1,142 +1,33 @@
--- Initial setup for LPH functions
 if not LPH_OBFUSCATED then
-    LPH_JIT = function(...) 
-        return ...;
-    end;
-    LPH_JIT_MAX = function(...) 
-        return ...;
-    end;
-    LPH_NO_VIRTUALIZE = function(...) 
-        return ...;
-    end;
-    LPH_NO_UPVALUES = function(f) 
-        return function(...) 
-            return f(...);
-        end;
-    end;
-    LPH_ENCSTR = function(...) 
-        return ...; 
-    end;
-    LPH_ENCNUM = function(...) 
-        return ...; 
-    end;
-    LPH_CRASH = function() 
-        return print(debug.traceback());
-    end;
-end
+	LPH_JIT = function(...) 
+		return ...;
+	end;
+	LPH_JIT_MAX = function(...) 
+		return ...;
+	end;
+	LPH_NO_VIRTUALIZE = function(...) 
+		return ...;
+	end;
+	LPH_NO_UPVALUES = function(f) 
+		return(function(...) 
+			return f(...);
+		end);
+	end;
+	LPH_ENCSTR = function(...) 
+		return ...; 
+	end;
+	LPH_ENCNUM = function(...) 
+		return ...; 
+	end;
+	LPH_CRASH = function() 
+		return print(debug.traceback());
+	end;
+end;
 
--- Services
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local Camera = workspace.CurrentCamera
-
--- Variables
-local ESPEnabled = false
-local NAMETAGSEnabled = false
-local GunChamsEnabled = false
-local HandChamsEnabled = false
-local LocalPlayer = Players.LocalPlayer
-local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
-local humanoid = character:WaitForChild("Humanoid")
-
-local TargetNames2 = {
-    "LeftLowerArm",
-    "LeftUpperArm",
-    "RightLowerArm",
-    "RightUpperArm",
-    "LeftHand",
-    "RightHand"
-}
-
--- Table to keep track of currently highlighted parts
-local highlightedParts = {}
-
--- Function to create a highlight
-local function createHighlight(object, fillTransparency)
-    if object and not object:FindFirstChildOfClass("Highlight") then
-        local highlight = Instance.new("Highlight")
-        highlight.Parent = object
-        highlight.Adornee = object
-        highlight.FillColor = Color3.new(0, 1, 0) -- Green fill color
-        highlight.OutlineColor = Color3.new(1, 1, 1) -- White outline color
-        highlight.FillTransparency = fillTransparency or 0.3 -- Adjust fill transparency (0 is opaque, 1 is fully transparent)
-        highlight.OutlineTransparency = 0 -- Adjust outline transparency (0 is opaque, 1 is fully transparent)
-    end
-end
-
--- Function to remove a highlight
-local function removeHighlight(object)
-    local highlight = object:FindFirstChildOfClass("Highlight")
-    if highlight then
-        highlight:Destroy()
-    end
-end
-
--- Function to update the highlight based on GunChamsEnabled
-local function updateGunChamsHighlight()
-    local viewModel = Camera:FindFirstChild("ViewModel")
-    if viewModel then
-        local item = viewModel:FindFirstChild("Item")
-        if item then
-            if GunChamsEnabled then
-                createHighlight(item, 0.3)
-            else
-                removeHighlight(item)
-            end
-        end
-    end
-end
-
--- Toggle function for GunChams
-local function toggleGunChams(enabled)
-    GunChamsEnabled = enabled
-    updateGunChamsHighlight()
-end
-
--- Function to update the highlight based on HandChamsEnabled
-local function updateHandChamsHighlight()
-    local viewModel = Camera:FindFirstChild("ViewModel")
-    if viewModel then
-        for _, name in ipairs(TargetNames2) do
-            local part = viewModel:FindFirstChild(name)
-            if part then
-                if HandChamsEnabled then
-                    createHighlight(part, 0.8)
-                    table.insert(highlightedParts, part)
-                else
-                    removeHighlight(part)
-                end
-            end
-        end
-    end
-
-    -- Clean up the highlightedParts table when HandChams is disabled
-    if not HandChamsEnabled then
-        highlightedParts = {}
-    end
-end
-
--- Toggle function for HandChams
-local function toggleHandChams(enabled)
-    HandChamsEnabled = enabled
-    updateHandChamsHighlight()
-end
-
--- Connect update functions to RunService's RenderStepped
-RunService.RenderStepped:Connect(updateGunChamsHighlight)
-RunService.RenderStepped:Connect(updateHandChamsHighlight)
-
--- Example usage
--- toggleGunChams(true)  -- Enable GunChams highlighting
--- toggleGunChams(false) -- Disable GunChams highlighting
--- toggleHandChams(true) -- Enable HandChams highlighting
--- toggleHandChams(false) -- Disable HandChams highlighting
-
--- Additional script setup (for Aimware and other functionalities)
 local counter = 1
-local devbuild228 = not Aimwareguardvars
+local devbuild228 = not swimguardvars
 if devbuild228 then
-    Aimwareguardvars = {
+    swimguardvars = {
         user = "developer",
         discordid = 716514203137081376,
         isprivate = true,
@@ -144,21 +35,17 @@ if devbuild228 then
         version = "dev build"
     }
 end
-
-local title, title2 = '.cc pd | %s | %s | fps %s',
+local title, title2 = '.gay pd | %s | %s | fps %s',
     '<font color="rgb(0, 255, 0)">AimWare</font><font color="rgb(166, 0, 255)">.cc</font> ' ..
-    (Aimwareguardvars.isprivate and not Aimwareguardvars.isdeveloper and 'private ' or Aimwareguardvars.isdeveloper and '' or '') ..
+    (swimguardvars.isprivate and not swimguardvars.isdeveloper and 'private ' or swimguardvars.isdeveloper and '' or '') ..
     '<font color="rgb(0, 255, 0)">V2</font>'
-
-local loadprivate = Aimwareguardvars.isprivate or Aimwareguardvars.isdeveloper
+local loadprivate = swimguardvars.isprivate or swimguardvars.isdeveloper
 
 local function wrap(f) coroutine.resume(coroutine.create(f)) end
-
 local Library, Toggles, Options, ThemeManager, SaveManager, _esplib = nil, nil, nil, nil, nil, nil
 print("loading Aimware... please stand by...")
 print('load_' .. tostring(counter))
 counter = counter + 1
-
 do
     local repo = "http://31.210.171.229:3000/new/"
     Library, Toggles, Options = loadstring(game:HttpGet(repo .. 'newlib/old/main'))()
@@ -166,17 +53,14 @@ do
     SaveManager = loadstring(game:HttpGet(repo .. 'newlib/old/save'))()
     _esplib = loadstring(game:HttpGet(repo .. 'newlib/old/esp'))()
 end
-
 print('load_' .. tostring(counter))
 counter = counter + 1
-
 local Window = Library:CreateWindow({
     Title = title2,
     Center = true,
     AutoShow = true,
     TabPadding = 8
 })
-
 local Tabs = {
     Main = Window:AddTab('features 1'),
     Visuals = Window:AddTab('esp/visuals'),
@@ -189,9 +73,9 @@ local plrs = game:GetService("Players")
 local plr = plrs.LocalPlayer
 local mouse = plr:GetMouse()
 local camera = game:GetService("Workspace").CurrentCamera
+local RunService = game:GetService("RunService")
 local Lighting = game:GetService("Lighting")
 local TweenService = game:GetService("TweenService")
-
 
 local othergames = {
     pdelta = {
@@ -627,7 +511,7 @@ local Misc = Tabs.Misc:AddLeftGroupbox('misc1')
 local CrosshairTab = Tabs.Misc:AddLeftGroupbox('crosshair')
 local movetab = Tabs.Misc:AddRightGroupbox('misc2')
 local stuffz = Tabs.Settings:AddLeftGroupbox('stuffz')
-local luatab = Tabs.Lua:AddRightGroupbox('Lua');
+local luatab = Tabs.Lua:AddRightGroupbox('Scripts');
 do
     local Sky = game:GetService("Lighting"):FindFirstChildOfClass("Sky")
     if not Sky then Sky = Instance.new("Sky", Lighting) end
@@ -727,7 +611,7 @@ end
         ZIndex = 2,
     })
     local logotext = draw:new("Text", {
-        Text = "Aimware",
+        Text = "protogen",
         Size = 13,
         Font = varsglobal.visuals.font,
         Outline = true,
@@ -739,7 +623,7 @@ end
         ZIndex = 2,
     })
     local text = draw:new("Text", {
-        Text = ".cc | fps | ping",
+        Text = ".gay | fps | ping",
         Size = 13,
         Font = varsglobal.visuals.font,
         Outline = true,
@@ -1419,7 +1303,7 @@ do
             "Cracked", "TP Hack", "PD MOD MENU", "DOWNLOAD", "Paste Bin", "download", "Download", "Teleport", "100% legit", "100%", "pro", "Professional", "灭性的神经",
             "No Virus All Clean", "No Survey", "No Ads", "Free", "Not Paid", "Real", "REAL 2024", "2024", "Real 2024", "Aimware", "Cracked", "Aimware CRACKED", "2014", "picklespub crack",
             "Aimware", "Hacks", "Cheats", "Exploits", "(FREE)", "🕶😎", "😎", "😂", "😛", "paste bin", "Aimware script", "hard code", "正免费下载和使", "SERVER BACKDOOR",
-            "Secret", "SECRET", "Unleaked", "Not Leaked", "Method", "Minecraft Steve", "Steve", "Minecraft", ""Aimware Hub", "Crumble Ware", "Script", "Octo Hook",
+            "Secret", "SECRET", "Unleaked", "Not Leaked", "Method", "Minecraft Steve", "Steve", "Minecraft", "Aimware", "Crumble Ware", "Script", "Octo Hook",
             "(OP)", "Verified", "All Clean", "Program",
             "Anti Ban", "Speed", "Fly", "Big Head", "Magic Bullet", "No Clip", "Auto", "Rapid Fire",
             "God Mode", "God", "Speed Fly", "Magic Bullet", "Infinite XRay", "Kill All", "Sigma", "And", "LEAKED",
@@ -1442,8 +1326,8 @@ do
             "他，所以他不那r给了他东西给了他爱欠s，却拒绝参加锻炼，这让他爱得更UGT少了",
             "Aimware 有的东西给了他，所以他不那rblx trader captain么有的东西给了他爱欠绝参加锻squidward炼，务，却拒绝参加锻炼，这让他爱得更UGT少了",
             "wocky slush他爱欠债了他他squilliam拥有的东西给爱欠绝参加锻squidward炼",
-            "坐下，一直保持着安静的状态Aimware 谁把他拥有的东西给了他，所以他不那rblx trader captain么有的东西给了他爱欠债了他他squilliam拥有的东西给爱欠绝参加锻squidward炼，务，却拒绝参加锻炼，这让他爱得更UGT少了",
-            "免费手榴弹Aimware hack绕过作弊工作Trident Surviv roblox aimbot瞄准无声目标绕过2020工作真正免费下载和使用",
+            "Aimware 谁把他拥有的东西给了他，所以他不那rblx trader captain么有的东西给了他爱欠债了他他squilliam拥有的东西给爱欠绝参加锻squidward炼，务，却拒绝参加锻炼，这让他爱得更UGT少了",
+            "Aimware hack绕过作弊工作Trident Surviv roblox aimbot瞄准无声目标绕过2020工作真正免费下载和使用",
             "zal發明了roblox汽車貿易商的船長ro blocks，並將其洩漏到整個宇宙，還修補了虛假的角神模式和虛假的身體，還發明了基於速度的AUTOWALL和無限制的自動壁紙遊戲 ",
             "彼が誤って禁止されたためにファントムからautowallgamingを禁止解除する請願とそれはでたらめですそれはまったく意味がありませんなぜあなたは合法的なプレーヤーを禁止するのですか ",
             "ジェイソンは私が神に誓う女性的な男の子ではありません ",
@@ -1531,7 +1415,7 @@ do
             "Clipped and Uploaded. 🤡",
             "nodus client slime castle crashers minecraft dupeing hack wizardhax xronize grief ... Tlcharger minecraft crack Oggi spiegheremo come creare un ip grabber!",
             "Off synonyme syls midge, smiled at mashup 2 mixed in key free download procom, ... Okay, love order and chaos online gameplayer hack amber forcen ahdistus",
-            "ˢᵗᵃʸ ᵐᵃᵈ ˢᵗᵃʸ Aimwareˡᵉˢˢ $ ",
+            "ˢᵗᵃʸ ᵐᵃᵈ ˢᵗᵃʸ ˢʷⁱᵐʰᵘᵇˡᵉˢˢ $ ",
             "Aimware does not relent ",
         }]]
         local spam_ytthumbs = {
@@ -1846,7 +1730,7 @@ end)
         end)
         Misc:AddInput('chatboxtest', {Default = 'hello there',Numeric = false,Finished = false,Text = 'chat',Tooltip = 'chat',Placeholder = 'enter text'})
         Misc:AddButton('send message in Aimware chat', function()
-            socket:Send("Aimware_"..rand..":-/-:"..tostring(Options.chatboxtest.Value))
+            socket:Send("swimhub_"..rand..":-/-:"..tostring(Options.chatboxtest.Value))
         end)
     end
 end;]]
@@ -2744,15 +2628,19 @@ end
 charactertab:AddToggle("gaysexvisor", { Text = "remove visor visuals", Default = false }):OnChanged(function(aa)
     pdlt.novisor = aa
 end)
-
-charactertab:AddToggle("guncham", { Text = "gun cham", Default = false }):OnChanged(function(aa)
-    toggleGunChams(aa)
-end)
-
-charactertab:AddToggle("armcham", { Text = "arm chams", Default = false }):OnChanged(function(aa)
-    toggleHandChams(aa)
-end)
-
+charactertab:AddToggle("nigtard", { Text = "toggle chams", Default = false })
+charactertab:AddToggle("localcham", { Text = "character chams", Default = false }):AddColorPicker('ccc',
+    { Default = Color3.new(1, 1, 1), Title = 'character chams color' })
+charactertab:AddToggle("ac", { Text = "arm chams", Default = false }):AddColorPicker('acc',
+    { Default = Color3.new(1, 1, 1), Title = 'arm chams color' })
+charactertab:AddToggle("gm", { Text = "gun chams", Default = false }):AddColorPicker('gcc',
+    { Default = Color3.new(1, 1, 1), Title = 'gun chams color' })
+charactertab:AddDropdown("ccm",
+    { Text = "character chams material", Default = "SmoothPlastic", Values = { "ForceField", "Neon", "SmoothPlastic", "Glass" } })
+charactertab:AddDropdown("acm",
+    { Text = "arm chams material", Default = "SmoothPlastic", Values = { "ForceField", "Neon", "SmoothPlastic", "Glass" } })
+charactertab:AddDropdown("gcm",
+    { Text = "gun chams material", Default = "SmoothPlastic", Values = { "ForceField", "Neon", "SmoothPlastic", "Glass" } });
 (function()
     charactertab:AddToggle('showmazafak', { Text = 'inventory viewer', Default = false, Callback = function(v) end })
     charactertab:AddSlider('mazafak_x', { Text = 'X', Default = 200, Min = 0, Max = 700, Rounding = 0, Compact = true })
