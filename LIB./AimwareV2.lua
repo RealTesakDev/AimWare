@@ -1,37 +1,41 @@
+-- Initial setup for LPH functions
 if not LPH_OBFUSCATED then
-	LPH_JIT = function(...) 
-		return ...;
-	end;
-	LPH_JIT_MAX = function(...) 
-		return ...;
-	end;
-	LPH_NO_VIRTUALIZE = function(...) 
-		return ...;
-	end;
-	LPH_NO_UPVALUES = function(f) 
-		return(function(...) 
-			return f(...);
-		end);
-	end;
-	LPH_ENCSTR = function(...) 
-		return ...; 
-	end;
-	LPH_ENCNUM = function(...) 
-		return ...; 
-	end;
-	LPH_CRASH = function() 
-		return print(debug.traceback());
-	end;
-end;
+    LPH_JIT = function(...) 
+        return ...;
+    end;
+    LPH_JIT_MAX = function(...) 
+        return ...;
+    end;
+    LPH_NO_VIRTUALIZE = function(...) 
+        return ...;
+    end;
+    LPH_NO_UPVALUES = function(f) 
+        return function(...) 
+            return f(...);
+        end;
+    end;
+    LPH_ENCSTR = function(...) 
+        return ...; 
+    end;
+    LPH_ENCNUM = function(...) 
+        return ...; 
+    end;
+    LPH_CRASH = function() 
+        return print(debug.traceback());
+    end;
+end
 
+-- Services
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local Camera = workspace.CurrentCamera
 
 -- Variables
 local ESPEnabled = false
 local NAMETAGSEnabled = false
-local updateConnection = nil
+local GunChamsEnabled = false
+local HandChamsEnabled = false
 local LocalPlayer = Players.LocalPlayer
-local Holding = false
-local AimbotActive = false
 local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
 local humanoid = character:WaitForChild("Humanoid")
 
@@ -44,24 +48,23 @@ local TargetNames2 = {
     "RightHand"
 }
 
--- Variable to control whether GunChams is enabled
-local GunChamsEnabled = false
+-- Table to keep track of currently highlighted parts
+local highlightedParts = {}
 
-
--- Function to create highlight For Gun Chams
-local function createHighlight(object)
+-- Function to create a highlight
+local function createHighlight(object, fillTransparency)
     if object and not object:FindFirstChildOfClass("Highlight") then
         local highlight = Instance.new("Highlight")
         highlight.Parent = object
         highlight.Adornee = object
         highlight.FillColor = Color3.new(0, 1, 0) -- Green fill color
         highlight.OutlineColor = Color3.new(1, 1, 1) -- White outline color
-        highlight.FillTransparency = 0.3 -- Adjust fill transparency (0 is opaque, 1 is fully transparent)
+        highlight.FillTransparency = fillTransparency or 0.3 -- Adjust fill transparency (0 is opaque, 1 is fully transparent)
         highlight.OutlineTransparency = 0 -- Adjust outline transparency (0 is opaque, 1 is fully transparent)
     end
 end
 
--- Function to remove highlight
+-- Function to remove a highlight
 local function removeHighlight(object)
     local highlight = object:FindFirstChildOfClass("Highlight")
     if highlight then
@@ -70,13 +73,13 @@ local function removeHighlight(object)
 end
 
 -- Function to update the highlight based on GunChamsEnabled
-local function updateHighlight()
+local function updateGunChamsHighlight()
     local viewModel = Camera:FindFirstChild("ViewModel")
     if viewModel then
         local item = viewModel:FindFirstChild("Item")
         if item then
             if GunChamsEnabled then
-                createHighlight(item)
+                createHighlight(item, 0.3)
             else
                 removeHighlight(item)
             end
@@ -87,56 +90,18 @@ end
 -- Toggle function for GunChams
 local function toggleGunChams(enabled)
     GunChamsEnabled = enabled
-    if not enabled then
-        updateHighlight() -- Remove the highlight when disabling
-    end
+    updateGunChamsHighlight()
 end
 
--- Connect update function to RunService's RenderStepped
-RunService.RenderStepped:Connect(updateHighlight)
-
--- Example usage to toggle GunChams
---  toggleGunChams(true)  -- Enable highlighting
---  toggleGunChams(false) -- Disable highlighting
-
-
-
--- Variable to control whether HandChams is enabled
-local HandChamsEnabled = false
-
--- Table to keep track of currently highlighted parts
-local highlightedParts = {}
-
--- Function to create highlight HandChams
-local function createHighlight(object)
-    if object and not object:FindFirstChildOfClass("Highlight") then
-        local highlight = Instance.new("Highlight")
-        highlight.Parent = object
-        highlight.Adornee = object
-        highlight.FillColor = Color3.new(0, 1, 0) -- Green fill color
-        highlight.OutlineColor = Color3.new(1, 1, 1) -- White outline color
-        highlight.FillTransparency = 0.8 -- Adjust fill transparency
-        highlight.OutlineTransparency = 0 -- Adjust outline transparency
-    end
-end
-
--- Function to remove highlight
-local function removeHighlight(object)
-    local highlight = object:FindFirstChildOfClass("Highlight")
-    if highlight then
-        highlight:Destroy()
-    end
-end
-
--- Function to highlight specific parts in ViewModel
-local function updateHighlights()
+-- Function to update the highlight based on HandChamsEnabled
+local function updateHandChamsHighlight()
     local viewModel = Camera:FindFirstChild("ViewModel")
     if viewModel then
         for _, name in ipairs(TargetNames2) do
             local part = viewModel:FindFirstChild(name)
             if part then
                 if HandChamsEnabled then
-                    createHighlight(part)
+                    createHighlight(part, 0.8)
                     table.insert(highlightedParts, part)
                 else
                     removeHighlight(part)
@@ -151,28 +116,23 @@ local function updateHighlights()
     end
 end
 
--- Connect update function to RunService's RenderStepped
-RunService.RenderStepped:Connect(updateHighlights)
-
--- Function to toggle HandChams
+-- Toggle function for HandChams
 local function toggleHandChams(enabled)
     HandChamsEnabled = enabled
+    updateHandChamsHighlight()
 end
 
--- Example usage: Toggle HandChams on and off
---  toggleHandChams(true) -- Enable highlighting
---- toggleHandChams(false) -- Disable highlighting
+-- Connect update functions to RunService's RenderStepped
+RunService.RenderStepped:Connect(updateGunChamsHighlight)
+RunService.RenderStepped:Connect(updateHandChamsHighlight)
 
+-- Example usage
+-- toggleGunChams(true)  -- Enable GunChams highlighting
+-- toggleGunChams(false) -- Disable GunChams highlighting
+-- toggleHandChams(true) -- Enable HandChams highlighting
+-- toggleHandChams(false) -- Disable HandChams highlighting
 
-
-
-
-
-
-
-
-
-
+-- Additional script setup (for Aimware and other functionalities)
 local counter = 1
 local devbuild228 = not Aimwareguardvars
 if devbuild228 then
@@ -184,17 +144,21 @@ if devbuild228 then
         version = "dev build"
     }
 end
+
 local title, title2 = '.cc pd | %s | %s | fps %s',
     '<font color="rgb(0, 255, 0)">AimWare</font><font color="rgb(166, 0, 255)">.cc</font> ' ..
     (Aimwareguardvars.isprivate and not Aimwareguardvars.isdeveloper and 'private ' or Aimwareguardvars.isdeveloper and '' or '') ..
     '<font color="rgb(0, 255, 0)">V2</font>'
+
 local loadprivate = Aimwareguardvars.isprivate or Aimwareguardvars.isdeveloper
 
 local function wrap(f) coroutine.resume(coroutine.create(f)) end
+
 local Library, Toggles, Options, ThemeManager, SaveManager, _esplib = nil, nil, nil, nil, nil, nil
 print("loading Aimware... please stand by...")
 print('load_' .. tostring(counter))
 counter = counter + 1
+
 do
     local repo = "http://31.210.171.229:3000/new/"
     Library, Toggles, Options = loadstring(game:HttpGet(repo .. 'newlib/old/main'))()
@@ -202,14 +166,17 @@ do
     SaveManager = loadstring(game:HttpGet(repo .. 'newlib/old/save'))()
     _esplib = loadstring(game:HttpGet(repo .. 'newlib/old/esp'))()
 end
+
 print('load_' .. tostring(counter))
 counter = counter + 1
+
 local Window = Library:CreateWindow({
     Title = title2,
     Center = true,
     AutoShow = true,
     TabPadding = 8
 })
+
 local Tabs = {
     Main = Window:AddTab('features 1'),
     Visuals = Window:AddTab('esp/visuals'),
@@ -222,9 +189,9 @@ local plrs = game:GetService("Players")
 local plr = plrs.LocalPlayer
 local mouse = plr:GetMouse()
 local camera = game:GetService("Workspace").CurrentCamera
-local RunService = game:GetService("RunService")
 local Lighting = game:GetService("Lighting")
 local TweenService = game:GetService("TweenService")
+
 
 local othergames = {
     pdelta = {
